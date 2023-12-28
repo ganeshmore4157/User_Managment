@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form/EditUserDialog.dart';
 import 'package:flutter_form/registration_page.dart';
 import 'package:flutter_form/user_detail_page.dart';
 
@@ -25,7 +26,8 @@ class MyApp extends StatelessWidget {
 }
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key, required refreshCallback});
+  const RegisterPage({Key? key, required refreshCallback})
+      : super(key: key);
 
   @override
   _RegisterPageState createState() => _RegisterPageState();
@@ -36,6 +38,12 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   TextEditingController mobileController = TextEditingController();
+  // TextEditingController gendreController=TextEditingController();
+  
+
+  // New field for gender
+  String gender = 'male';
+  
 
   Service service = Service();
 
@@ -56,94 +64,6 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       print("Error fetching user list: $e");
     }
-  }
-
-  Future<void> showEditDialog(User user) async {
-    nameController.text = user.name;
-    emailController.text = user.email;
-    mobileController.text = user.mobile;
-    addressController.text = user.address;
-
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Edit User'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Name'),
-                ),
-                TextField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                ),
-                TextField(
-                  controller: mobileController,
-                  decoration: const InputDecoration(labelText: 'Mobile'),
-                ),
-                TextField(
-                  controller: addressController,
-                  decoration: const InputDecoration(labelText: 'Address'),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            ElevatedButton(
-              onPressed: () async {
-                await service.updateUser(
-                  user.id,
-                  nameController.text,
-                  mobileController.text,
-                  emailController.text,
-                  addressController.text,
-                );
-                Navigator.of(context).pop();
-                fetchUserList();
-              },
-              child: const Text('Save'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> showDeleteDialog(User user) async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Delete User'),
-          content: const Text('Are you sure you want to delete this user?'),
-          actions: <Widget>[
-            ElevatedButton(
-              onPressed: () async {
-                await service.deleteUser(user.id);
-                Navigator.of(context).pop();
-                fetchUserList();
-              },
-              child: const Text('Yes'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('No'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   ElevatedButton buildActionButton(String label, VoidCallback onPressed) {
@@ -169,18 +89,18 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       ),
       body: Container(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(height: 20),
-            Text('User List',
+            const SizedBox(height: 20),
+            const Text('User List',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 28, color: Colors.red)),
             userList.isEmpty
-                ? Text('No users available')
+                ? const Text('No users available')
                 : DataTable(
-                    columns: [
+                    columns: const [
                       DataColumn(
                           label: Text(
                         'Name',
@@ -201,6 +121,12 @@ class _RegisterPageState extends State<RegisterPage> {
                       )),
                       DataColumn(
                           label: Text(
+                        'Gender',
+                        textAlign: TextAlign.justify,
+                        style: TextStyle(fontSize: 20, color: Colors.blue),
+                      )),
+                       DataColumn(
+                          label: Text(
                         'Actions',
                         textAlign: TextAlign.justify,
                         style: TextStyle(fontSize: 20, color: Colors.blue),
@@ -212,6 +138,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 DataCell(Text(user.name)),
                                 DataCell(Text(user.email)),
                                 DataCell(Text(user.address)),
+                                DataCell(Text(user.gender)),
                                 DataCell(Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -249,17 +176,19 @@ class _RegisterPageState extends State<RegisterPage> {
                             ))
                         .toList(),
                   ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => RegistrationPage(
-                          fetchUserListCallback: fetchUserList)),
+                    builder: (context) => RegistrationPage(
+                      fetchUserListCallback: fetchUserList,
+                    ),
+                  ),
                 );
               },
-              child: Text(
+              child: const Text(
                 'Add New User',
                 style: TextStyle(
                   fontSize: 25,
@@ -271,4 +200,50 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
+
+
+Future<void> showEditDialog(User user) async {
+  showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return EditUserDialog(
+        user: user,
+        onEdit: () {
+          // Callback to refresh user list after editing
+          fetchUserList();
+        },
+      );
+    },
+  );
+}
+
+  
+  Future<void> showDeleteDialog(User user) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete User'),
+          content: const Text('Are you sure you want to delete this user?'),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () async {
+                await service.deleteUser(user.id);
+                Navigator.of(context).pop();
+                fetchUserList();
+              },
+              child: const Text('Yes'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('No'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }

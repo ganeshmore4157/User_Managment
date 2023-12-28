@@ -7,7 +7,7 @@ class Service {
   static const String baseUrl = "http://localhost:8080/api/users";
 
   Future<http.Response> saveUser(
-      String name, String mobile, String email, String address) async {
+      String name, String mobile, String email, String address,String gender) async {
     var uri = Uri.parse(baseUrl);
     Map<String, String> headers = {"Content-Type": "application/json"};
     Map data = {
@@ -15,15 +15,17 @@ class Service {
       'email': '$email',
       'mobile': '$mobile',
       'address': '$address',
+      'gender': '$gender',
     };
     var body = json.encode(data);
     var response = await http.post(uri, headers: headers, body: body);
+    print(data);
     return response;
     
   }
 
   Future<http.Response> updateUser(
-      String id, String name, String mobile, String email, String address) async {
+      String id, String name, String mobile, String email, String address, String gender) async {
     var uri = Uri.parse('$baseUrl/$id');
     Map<String, String> headers = {"Content-Type": "application/json"};
     Map data = {
@@ -31,9 +33,12 @@ class Service {
       'email': '$email',
       'mobile': '$mobile',
       'address': '$address',
+      'gender': '$gender',
+      
     };
     var body = json.encode(data);
     var response = await http.put(uri, headers: headers, body: body);
+    print(data);
     return response;
   }
 
@@ -62,6 +67,7 @@ class User {
   final String email;
   final String mobile;
   final String address;
+  final String gender;
 
   User({
     required this.id,
@@ -69,6 +75,7 @@ class User {
     required this.email,
     required this.mobile,
     required this.address,
+    required this.gender,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -78,6 +85,8 @@ class User {
       email: json['email'],
       mobile: json['mobile'],
       address: json['address'],
+      gender: json['gender'].toString(),
+      
     );
   }
 }

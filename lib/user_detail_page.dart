@@ -1,4 +1,3 @@
-// user_detail_page.dart
 import 'package:flutter/material.dart';
 
 import 'service.dart';
@@ -44,6 +43,7 @@ class UserDetailPage extends StatelessWidget {
             _buildDetailRow('Email', user.email),
             _buildDetailRow('Mobile', user.mobile),
             _buildDetailRow('Address', user.address),
+            _buildDetailRow('Gender',user.gender),
           ],
         ),
       ),
